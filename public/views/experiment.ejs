@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Experiment</title>
+        <script language="javascript" src="libraries/p5.min.js"></script>
+        <script language="javascript" src="libraries/p5.dom.min.js"></script>
+        <script language="javascript" src="libraries/d3.min.js"></script>
+        <script language="javascript" src="libraries/lodash.min.js"></script>
+        <script language="javascript" src="libraries/jquery-3.4.1.min.js"></script>
+        <script language="javascript" src="jspsych/jspsych.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-external-html.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-2afc-p5.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-instructions.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-survey-text.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-survey-likert-customized.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-survey-multi-choice.js"></script>
+        <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+        <link href="css/experiment.css" rel="stylesheet" type="text/css"></link>
+    </head>
+    <body>
+      <!-- preloading images that will be used in instructions (and thus not preloaded by jspsych) -->
+      <div style="display:none;">
+        <img src="img/landscape/scene1.png" width="1" height="1" border="0" alt="">
+        <img src="img/landscape/scene2.png" width="1" height="1" border="0" alt="">
+        <img src="img/landscape/scene3.png" width="1" height="1" border="0" alt="">
+      </div>
+    </body>
+    <script>
+
+
+    //https://www.color-hex.com/color-palette/36175
+    //https://www.color-hex.com/color-palette/547
+
+    var input_data = <%- input_data %>
+    var trial_id = input_data.trial_id
+    var cmpltnCd = makeCode(3)+'RtR' + makeCode(5) + '4z4'
+    jsPsych.data.addProperties({cmpltnCd: cmpltnCd,
+                                trial_id: trial_id});
+
+    var data = {};
+    var timeline = [];
+    var experiment_start_time;
+    var save_attempts = 0;
+    var saveTimeout = 1000;
+    var cmpltnCdEnd;
+    var dataUrl = '/data?trial_id=' + trial_id;
+
+    // var landscapes = ['img/landscape/scene1.png','img/landscape/scene2.png','img/landscape/scene3.png'];
+    // var landscapes_shuffled = jsPsych.randomization.shuffle(landscapes);
+
+    // colors
+
+    var skin_colors = [
+      [255, 229, 200],
+      [255, 218, 190],
+      [255, 206, 180],
+      [240, 184, 160],
+      [225, 172, 150],
+      [210, 161, 140],
+      [180, 138, 120],
+      [150, 115, 100],
+      [120, 92, 80],
+      [90, 69, 60],
+    ]
+
+    // var ordinals = {1: 'First', 2: 'Second', 3: 'Finally'};
+    // var towns = ['Greenville', 'Kingston', 'Fairfield']
+
+    // conditions
+
+    var contrasts = [[5, 3], [4, 2], [3, 1]];
+
+    // consent
+
+    var consent = {
+      type: 'external-html',
+      url: '../views/consent.html',
+      check_fn: function(){
+        experiment_start_time = Date.now();
+        return true;
+      },
+      cont_btn: 'consent'
+    }
+
+    // instructions IF demo
+
+    var instructions_demo = {
+      type: 'instructions',
+      pages: ['This is a demonstration of an experiment studying social information use. No data will be recorded, and the consent form will thus be skipped.'],
+      show_clickable_nav: true,
+    }
+
+    // english
+
+    var english_instructions = {
+      type: 'instructions',
+      pages: ['In this study, you will be doing two main tasks. In the first task, you\'ll be rating sentences according to whether they are good English or not.<br><br>' +
+      'For each sentence, just click "yes" if you think it is good English and "no" if you think it is not.'],
+      show_clickable_nav: true,
+    }
+
+    var english_options = ['no', 'yes'];
+    var questions_eng = [{name: 0, prompt: "Athletes often need to warm up.", options: english_options, horizontal: true, required: true},
+      {name: 1, prompt: "I just saw a moose running down the road!", options: english_options, horizontal: true, required: true},
+      {name: 2, prompt: "John ill felt and went doctor.", options: english_options, horizontal: true, required: true},
+      {name: 3, prompt: "Could you the books put in that boxes?", options: english_options, horizontal: true, required: true},
+      {name: 4, prompt: "I am forget do my homeworks.", options: english_options, horizontal: true, required: true},
+      {name: 5, prompt: "She think English is more easier to learn.", options: english_options, horizontal: true, required: true},
+      {name: 6, prompt: "Tommorow will be thatier than today.", options: english_options, horizontal: true, required: true},
+      {name: 7, prompt: "The building is very murnley.", options: english_options, horizontal: true, required: true},
+      {name: 8, prompt: "Where is the pen that I gave it to you yesterday?", options: english_options, horizontal: true, required: true},
+      {name: 9, prompt: "He was pulled over by the police for driving 120 miles per hour.", options: english_options, horizontal: true, required: true},
+    ]
+    questions_eng_shuffled = jsPsych.randomization.repeat(questions_eng, 1);
+
+    var english = {
+      type: 'survey-multi-choice',
+      questions: questions_eng_shuffled,
+      preamble: 'Are the following sentences good English ("yes") or not ("no")?',
+    };
+
+    // set up agents
+    // set up channels
+
+    // practice trials
+
+    // trials
+    var trial1 = {
+      type: '2afc-p5'
+    }
+
+
+    // bio
+
+
+    // feedback
+
+    // timeline
+
+    // if(trial_id == 'test'){
+    //   timeline.push(instructions_demo);
+    // } else {
+    //   timeline.push(consent);
+    // }
+    //
+    // timeline.push(english_instructions);
+    // timeline.push(english);
+    //
+
+    timeline.push(trial1)
+
+
+
+    jsPsych.init({
+        // preload_images: landscapes_shuffled.concat(animalImgs),
+        default_iti: 500,
+        show_progress_bar: true,
+        // exclusions: {
+        //   min_width: 800,
+        //   min_height: 500
+        // },
+        timeline: timeline,
+        on_finish: function(){
+          save();
+        }
+    });
+
+    function save(){
+      if(save_attempts==0){
+        var experiment_end_time = Date.now();
+        var duration = experiment_end_time - experiment_start_time;
+        var interactionData = jsPsych.data.getInteractionData().json();
+        jsPsych.data.get().addToLast({duration: duration,
+                                      interactionData: interactionData,
+                                    });
+        data.responses = jsPsych.data.get().json();
+        data.trial_id = trial_id;
+        data.cmpltnCd = cmpltnCd;
+        cmpltnCdEnd = cmpltnCd + trial_id;
+        console.log('    About to post survey output data...', data);
+      }
+      dataJSON = JSON.stringify(data);
+
+      $.ajax({
+         type: 'POST',
+         url: dataUrl,
+         data: dataJSON,
+         contentType: "application/json",
+         timeout: 3000,
+         success: function(request, status, error){
+           finish(cmpltnCdEnd+'_'+save_attempts)
+         },
+         error: function(request, status){
+           $('#jspsych-content').html("Please wait a few seconds while we save your responses...")
+           console.log('    Error posting data...', request, status)
+           if ( save_attempts < 5) {
+             save_attempts += 1;
+             saveTimeout += 500;
+             console.log("Trying again, attempt ", save_attempts)
+             setTimeout(function () {
+                save();
+                }, saveTimeout)
+           } else {
+             finish(cmpltnCdEnd+'_'+save_attempts);
+           }
+         }
+       });
+    }
+
+    function finish(cmpltnCd){
+      if(trial_id=='test'){
+        window.location.href = '/finish_demo'
+      } else {
+        window.location.href = "/finish?token="+cmpltnCd;
+      }
+
+    }
+
+    function makeCode(len){
+      var text = "";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvwxy0123456789";
+      for( var i=0; i < len; i++ ){
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      }
+      return text;
+    };
+
+    </script>
+</html>
