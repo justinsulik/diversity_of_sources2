@@ -63,6 +63,12 @@
       [90, 69, 60],
     ]
 
+    // #https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
+    var shirt_colors = [[230, 25, 75], [60, 180, 75], [225, 225, 25], [67, 99, 216], [245, 130, 49],
+    [145, 30, 180], [70, 240, 240], [240, 50, 230], [188, 246, 12], [250, 190, 190], [0, 128, 128], [230,190, 255],
+    [154, 99, 36], [255, 250, 200], [128, 0, 0], [170, 255, 195], [128, 128, 0], [255, 216, 177], [0, 0, 117],
+    [128, 128, 128], [255, 255, 255], [0, 0, 0]];
+
     // var ordinals = {1: 'First', 2: 'Second', 3: 'Finally'};
     // var towns = ['Greenville', 'Kingston', 'Fairfield']
 
@@ -126,7 +132,9 @@
 
     // trials
     var trial1 = {
-      type: '2afc-p5'
+      type: '2afc-p5',
+      skin_colors: jsPsych.randomization.sampleWithoutReplacement(skin_colors, 5),
+      shirt_colors: jsPsych.randomization.sampleWithoutReplacement(shirt_colors, 10)
     }
 
 
