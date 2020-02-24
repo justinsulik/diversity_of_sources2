@@ -27,12 +27,6 @@ jsPsych.plugins['2afc-p5'] = (function(){
         default: 5,
         description: 'number of agents in each choice'
       },
-      channel_ids: {
-        type: jsPsych.plugins.parameterType.INT,
-        array: true,
-        default: [0, 1, 2, 3, 4],
-        description: 'Which channel IDs to use (shuffle in main expt script)'
-      },
       instructions: {
         type: jsPsych.plugins.parameterType.COMPLEX,
         default: {scenario: 'blah'},
@@ -48,7 +42,10 @@ jsPsych.plugins['2afc-p5'] = (function(){
 
   plugin.trial = function(display_element, trial){
 
-    // set up basic html for trial
+    /****
+    ** Set up basic html for trial
+    ****/
+
     var choice_dims = {width: 300, height: 500};
     var outer_dims = {width: 700};
 
@@ -67,7 +64,9 @@ jsPsych.plugins['2afc-p5'] = (function(){
 
     display_element.innerHTML = css + html;
 
-    // trial variables
+    /****
+    ** Define trial variables
+    ****/
 
     var sketches = [];
     var trial_data = {checks: {}, attn_check_misses: 0, rt: {}};
@@ -75,16 +74,17 @@ jsPsych.plugins['2afc-p5'] = (function(){
     var agent_count = trial.agents;
     var agent_ids = {0: [], 1: []};
 
-    // assign agent ids
-    // first, pick a gender ratio, weighted to have higher likelihood of more balanced
+    /****
+    ** Generate agent ids
+    ****/
+
+    // first, pick a gender ratio, weighted to have higher likelihood of being more balanced
     var number_males = _.sample([0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5]);
     var number_females = trial.agents - number_males;
-    console.log(number_males, number_females)
-    // generate IDs for each gender
+    // generate IDs for each gender, enough for 2 pannels
     var male_ids = _.sampleSize(_.range(0,15), number_males*2);
     var female_ids = _.sampleSize(_.range(0,15), number_females*2);
-    console.log(male_ids, female_ids);
-    // for each choice batch, generate random IDs
+    // for each choice pannel, and for each gender, sample random IDs
     var choices = [0, 1];
     choices.forEach(function(choice){
       male_ids.slice(choice*number_males,(choice+1)*number_males).forEach(function(id){
@@ -94,7 +94,67 @@ jsPsych.plugins['2afc-p5'] = (function(){
         agent_ids[choice].push({gender: 'f', hair: id});
       });
     });
-    console.log(agent_ids)
+
+    /****
+    ** Generate channels
+    ****/
+
+    // define colors
+    var channel_colors = {
+      0: 'green', 1: 'green', 4: 'green', 17: 'green',
+      5: 'blue', 7: 'blue', 14: 'blue', 16: 'blue',
+      2: 'red', 19: 'red',
+      3: 'brown', 18: 'brown',
+      8: 'purple', 9: 'pink', 12: 'pink',
+      10: 'orange', 11: 'orange',
+      6: 'purple', 13: 'purple', 15: 'purple'
+    };
+
+    // define colors that are too similar to be on the screen at the same time
+
+    var clashes_dict = {
+      pink: ['red', 'pink'],
+      purple: ['purple'],
+      red: ['pink', 'red'],
+      brown: ['orange', 'brown'],
+      orange: ['brown', 'orange'],
+      green: ['green'],
+      blue: ['blue']
+    };
+
+    function checkClashes(channel1, current_pool){
+      // return a list of channels that can be used, eliminating potential clashes
+      var color1 = channel_colors[channel1];
+      var clashes = clashes_dict[color1];
+      var remaining = _.filter(current_pool, function(channel2){
+        var color2 = channel_colors[channel2];
+        if(clashes.indexOf(color2)==-1){
+          // no clash
+          return true;
+        } else {
+          // clash
+          return false;
+        }
+      });
+      return remaining;
+    }
+
+    function assignChannels(){
+      // get enough channels to fill the largest # contrasts
+      var pool = _.range(0,20);
+      var channels = [];
+      var channels_needed = _.max(trial.contrasts);
+      _.range(0,channels_needed).forEach(function(i){
+          var candidate = _.sample(pool);
+          channels.push(candidate);
+          var new_pool = checkClashes(candidate, pool);
+          pool = new_pool;
+      });
+      return channels;
+    }
+
+    var channel_ids = assignChannels();
+
     // check if p5 script is loaded; create sketches
 
     if (window.p5){
@@ -117,7 +177,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
 
     function displayId(choice){
       // depending on the trial condition, create a dictionary with agent# as key and tv station ID as val
-      var displayDict = {};
+      var display_dict = {};
       var display_count = agent_count;
       var unique_channels = trial.contrasts[choice];
       var keys = _.range(0,display_count);
@@ -128,10 +188,11 @@ jsPsych.plugins['2afc-p5'] = (function(){
       }
       var channels_shuffled = jsPsych.randomization.shuffle(channels);
       keys_shuffled.forEach(function(d, i){
-        displayDict[d] = channels_shuffled[i];
+        display_dict[d] = channel_ids[channels_shuffled[i]];
       });
-      return displayDict;
+      return display_dict;
     }
+
 
 /*
  P5.js sketch
@@ -151,7 +212,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
       var topMargin = 10;
 
       var tvSize = {x: 110, y: 110};
-      var displayDict = displayId(choiceID);
+      var display_dict = displayId(choiceID);
 
       var bodyColors = _.map(_.range(0, agent_count), function(i){
         return shirt_colors[5*choiceID+i];
@@ -225,8 +286,8 @@ jsPsych.plugins['2afc-p5'] = (function(){
         this.jawOffset = 2;
 
         this.showLogo = function(){
-          sketch.image(backgrounds[this.channel], 0, 0, tvSize.x, tvSize.y);
-          sketch.image(jaws[this.channel], 0, this.jawOffset, tvSize.x, tvSize.y);
+          sketch.image(backgrounds[this.agentNumber], 0, 0, tvSize.x, tvSize.y);
+          sketch.image(jaws[this.agentNumber], 0, this.jawOffset, tvSize.x, tvSize.y);
         };
 
         this.displayTv = function(){
@@ -267,11 +328,10 @@ jsPsych.plugins['2afc-p5'] = (function(){
           if(trial.choice_type=='intentional'){
             remotesImg[j] = sketch.loadImage('img/remotes/'+j+'.png');
           }
+          var channel_id = display_dict[j];
+          backgrounds[j] = sketch.loadImage('img/tv/channel_'+channel_id+'.png');
+          jaws[j] = sketch.loadImage('img/tv/channel_'+channel_id+'_jaw.png');
         }
-        trial.channel_ids.forEach(function(d,i){
-          backgrounds[i] = sketch.loadImage('img/tv/channel_'+d+'.png');
-          jaws[i] = sketch.loadImage('img/tv/channel_'+d+'_jaw.png');
-        });
       };
 
       sketch.setup = function() {
@@ -281,12 +341,12 @@ jsPsych.plugins['2afc-p5'] = (function(){
         });
         agents.forEach(function(d,i){
           tvs[i].loadPixels();
-          var k = displayDict[i];
+          var k = display_dict[i];
           displays[i] = new Display(i, k);
         });
 
         var canvas = sketch.createCanvas(choice_dims.width, choice_dims.height);
-        canvas.id("canvas_choice_"+choiceID)
+        canvas.id("canvas_choice_"+choiceID);
         sketch.frameRate(10);
       };
 
