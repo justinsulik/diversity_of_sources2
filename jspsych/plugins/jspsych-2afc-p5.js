@@ -36,6 +36,16 @@ jsPsych.plugins['2afc-p5'] = (function(){
         type: jsPsych.plugins.parameterType.COMPLEX,
         array: true,
         description: 'array of rgb vals for skin tones'
+      },
+      tv_background: {
+        type: jsPsych.plugins.parameterType.INT,
+        array: true,
+        description: 'RGB array for the color of the TV background'
+      },
+      tv_channels: {
+        type: jsPsych.plugins.parameterType.STRING,
+        array: true,
+        description: 'File name for TV anchors'
       }
     }
   };
@@ -48,8 +58,8 @@ jsPsych.plugins['2afc-p5'] = (function(){
 
     var choice_dims = {width: 300, height: 500};
     var outer_dims = {width: 700};
-    var contrasts = jsPsych.randomization.shuffle(trial.contrasts)
-    console.log(contrasts)
+    var contrasts = jsPsych.randomization.shuffle(trial.contrasts);
+    console.log(contrasts[0], '---', contrasts[1])
 
     var css = '<style id="jspsych-2afc-p5-css">'+
     '.choice-container {display: inline-block; border: 3px solid #F2F2F2; position: relative; height: '+choice_dims.height+'px; width: '+choice_dims.width+'px}'+
@@ -66,7 +76,6 @@ jsPsych.plugins['2afc-p5'] = (function(){
 
     display_element.innerHTML = css + html;
 
-
     /****
     ** Define trial variables
     ****/
@@ -74,6 +83,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
     var sketches = [];
     var trial_data = {
       contrasts: contrasts
+      // add agent/tv data
     };
     var start_time;
     var agent_count = trial.agents;
@@ -100,65 +110,6 @@ jsPsych.plugins['2afc-p5'] = (function(){
       });
     });
 
-    /****
-    ** Generate channels
-    ****/
-
-    // define colors
-    var channel_colors = {
-      0: 'green', 1: 'green', 4: 'green', 17: 'green',
-      5: 'blue', 7: 'blue', 14: 'blue', 16: 'blue',
-      2: 'red', 19: 'red',
-      3: 'brown', 18: 'brown',
-      8: 'purple', 9: 'pink', 12: 'pink',
-      10: 'orange', 11: 'orange',
-      6: 'purple', 13: 'purple', 15: 'purple'
-    };
-
-    // define colors that are too similar to be on the screen at the same time
-
-    var clashes_dict = {
-      pink: ['red', 'pink'],
-      purple: ['purple'],
-      red: ['pink', 'red'],
-      brown: ['orange', 'brown'],
-      orange: ['brown', 'orange'],
-      green: ['green'],
-      blue: ['blue']
-    };
-
-    function checkClashes(channel1, current_pool){
-      // return a list of channels that can be used, eliminating potential clashes
-      var color1 = channel_colors[channel1];
-      var clashes = clashes_dict[color1];
-      var remaining = _.filter(current_pool, function(channel2){
-        var color2 = channel_colors[channel2];
-        if(clashes.indexOf(color2)==-1){
-          // no clash
-          return true;
-        } else {
-          // clash
-          return false;
-        }
-      });
-      return remaining;
-    }
-
-    function assignChannels(){
-      // get enough channels to fill the largest # contrasts
-      var pool = _.range(0,20);
-      var channels = [];
-      var channels_needed = _.max(trial.contrasts);
-      _.range(0,channels_needed).forEach(function(i){
-          var candidate = _.sample(pool);
-          channels.push(candidate);
-          var new_pool = checkClashes(candidate, pool);
-          pool = new_pool;
-      });
-      return channels;
-    }
-
-    var channel_ids = assignChannels();
 
     // check if p5 script is loaded; create sketches
 
@@ -184,7 +135,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
       // depending on the trial condition, create a dictionary with agent# as key and tv station ID as val
       var display_dict = {};
       var display_count = agent_count;
-      var unique_channels = trial.contrasts[choice];
+      var unique_channels = contrasts[choice];
       var keys = _.range(0,display_count);
       var keys_shuffled = jsPsych.randomization.shuffle(keys);
       var channels = _.range(0, unique_channels);
@@ -193,7 +144,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
       }
       var channels_shuffled = jsPsych.randomization.shuffle(channels);
       keys_shuffled.forEach(function(d, i){
-        display_dict[d] = channel_ids[channels_shuffled[i]];
+        display_dict[d] = channels_shuffled[i];
       });
       return display_dict;
     }
@@ -210,8 +161,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
       var displays = [];
       var agents = [];
       var tvs = [];
-      var backgrounds = [];
-      var jaws = [];
+      var tv_channels = [];
       var agentParts = {m: {hair: {}}, f: {hair: {}}};
       var agentSize = 90;
       var topMargin = 10;
@@ -284,15 +234,19 @@ jsPsych.plugins['2afc-p5'] = (function(){
 
       function Display(agentNumber, channel){
         this.agentNumber = agentNumber;
-        this.tv = tvs[agentNumber];
         this.channel = channel;
+        this.tv = tvs[agentNumber];
+        this.background_color = trial.tv_background[channel];
         this.y = agentNumber*((choice_dims.height-topMargin)/agent_count) + topMargin + 5;
         this.x = 140;
         this.jawOffset = 2;
 
-        this.showLogo = function(){
-          sketch.image(backgrounds[this.agentNumber], 0, 0, tvSize.x, tvSize.y);
-          sketch.image(jaws[this.agentNumber], 0, this.jawOffset, tvSize.x, tvSize.y);
+        this.showChannel = function(){
+          sketch.push();
+            sketch.fill(this.background_color[0],this.background_color[1],this.background_color[2]);
+            sketch.rect(9, 21, 93, 60);
+            sketch.image(tv_channels[this.channel], 0, 0, tvSize.x, tvSize.y);
+          sketch.pop();
         };
 
         this.displayTv = function(){
@@ -302,7 +256,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
             sketch.image(this.tv, 0, 0, tvSize.x, tvSize.y);
             sketch.push();
             sketch.fill(255);
-            this.showLogo();
+            this.showChannel();
             sketch.pop();
           sketch.pop();
         };
@@ -330,24 +284,23 @@ jsPsych.plugins['2afc-p5'] = (function(){
 
         for(var j = 0; j<agent_count; j++){
           tvs[j] = sketch.loadImage('img/tv/tv_'+j+'.png');
-          if(trial.choice_type=='intentional'){
-            remotesImg[j] = sketch.loadImage('img/remotes/'+j+'.png');
-          }
-          var channel_id = display_dict[j];
-          backgrounds[j] = sketch.loadImage('img/tv/channel_'+channel_id+'.png');
-          jaws[j] = sketch.loadImage('img/tv/channel_'+channel_id+'_jaw.png');
+        }
+
+        for(var k = 0; k < trial.tv_channels.length; k++){
+          var channel_id = trial.tv_channels[k];
+          tv_channels[k] = sketch.loadImage('img/tv/'+channel_id+'.png');
         }
       };
 
       sketch.setup = function() {
-        backgrounds.forEach(function(d,i){
-          backgrounds[i].loadPixels();
-          jaws[i].loadPixels();
+
+        tv_channels.forEach(function(d,i){
+          tv_channels[i].loadPixels();
         });
+
         agents.forEach(function(d,i){
           tvs[i].loadPixels();
-          var k = display_dict[i];
-          displays[i] = new Display(i, k);
+          displays[i] = new Display(i, display_dict[i]);
         });
 
         var canvas = sketch.createCanvas(choice_dims.width, choice_dims.height);
@@ -362,24 +315,14 @@ jsPsych.plugins['2afc-p5'] = (function(){
         });
       };
 
-      // sketch.draw = function(){
-      //   sketch.background(255);
-      //   displays.forEach(function(d,i){
-      //     d.displayTv();
-      //   });
-      //   agents.forEach(function(d,i){
-      //     d.show();
-      //   });
-      // };
-
     }, 'choice'+choiceID);
 
-    //inputes
+    //inputs
     $('.choice-container').on('click', function(e){
       var target = e.target.id;
       var choice = target.charAt(target.length-1);
-      var diversity = trial.contrasts[parseInt(choice)];
-      console.log(target, choice, diversity)
+      var diversity = contrasts[parseInt(choice)];
+      console.log(target, choice, diversity);
     });
   }
 };
