@@ -1,10 +1,7 @@
 /*jshint esversion: 6 */
 
 /*
-https://guarded-coast-18242.herokuapp.com/ | https://git.heroku.com/guarded-coast-18242.git
-
-To do:
-
+https://salty-journey-53248.herokuapp.com/ | https://git.heroku.com/salty-journey-53248.git
 */
 
 // --- LOADING MODULES

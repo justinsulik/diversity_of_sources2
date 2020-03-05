@@ -28,8 +28,8 @@ jsPsych.plugins['2afc-p5'] = (function(){
         description: 'number of agents in each choice'
       },
       instructions: {
-        type: jsPsych.plugins.parameterType.COMPLEX,
-        default: {scenario: 'blah'},
+        type: jsPsych.plugins.parameterType.STRING,
+        default: 'Which group\'s opinions would you trust more?',
         description: 'instructions, with each stage of the trial as a key. Stages = scenario, priorEstimate, tvStart, tvsOn, socInfoCheck, posteriorEstimate'
       },
       skin_colors: {
@@ -48,6 +48,8 @@ jsPsych.plugins['2afc-p5'] = (function(){
 
     var choice_dims = {width: 300, height: 500};
     var outer_dims = {width: 700};
+    var contrasts = jsPsych.randomization.shuffle(trial.contrasts)
+    console.log(contrasts)
 
     var css = '<style id="jspsych-2afc-p5-css">'+
     '.choice-container {display: inline-block; border: 3px solid #F2F2F2; position: relative; height: '+choice_dims.height+'px; width: '+choice_dims.width+'px}'+
@@ -58,18 +60,21 @@ jsPsych.plugins['2afc-p5'] = (function(){
     '.right {float: right;}'+
     '</style>';
 
-    var html = '<div id="task-container"><div id="instructions" class="instructions">blah</div>'+
+    var html = '<div id="task-container"><div id="instructions" class="instructions">'+trial.instructions+'</div>'+
     '<div id="outer-container"><div id="choice0" class="choice-container left"></div>'+
     '<div id="choice1" class="choice-container right"></div></div></div>';
 
     display_element.innerHTML = css + html;
+
 
     /****
     ** Define trial variables
     ****/
 
     var sketches = [];
-    var trial_data = {checks: {}, attn_check_misses: 0, rt: {}};
+    var trial_data = {
+      contrasts: contrasts
+    };
     var start_time;
     var agent_count = trial.agents;
     var agent_ids = {0: [], 1: []};
@@ -348,9 +353,6 @@ jsPsych.plugins['2afc-p5'] = (function(){
         var canvas = sketch.createCanvas(choice_dims.width, choice_dims.height);
         canvas.id("canvas_choice_"+choiceID);
         sketch.frameRate(10);
-      };
-
-      sketch.draw = function(){
         sketch.background(255);
         displays.forEach(function(d,i){
           d.displayTv();
@@ -359,6 +361,16 @@ jsPsych.plugins['2afc-p5'] = (function(){
           d.show();
         });
       };
+
+      // sketch.draw = function(){
+      //   sketch.background(255);
+      //   displays.forEach(function(d,i){
+      //     d.displayTv();
+      //   });
+      //   agents.forEach(function(d,i){
+      //     d.show();
+      //   });
+      // };
 
     }, 'choice'+choiceID);
 
