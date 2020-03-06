@@ -59,20 +59,21 @@ jsPsych.plugins['2afc-p5'] = (function(){
     var choice_dims = {width: 300, height: 500};
     var outer_dims = {width: 700};
     var contrasts = jsPsych.randomization.shuffle(trial.contrasts);
-    console.log(contrasts[0], '---', contrasts[1])
+    var sketches_complete = {0: false, 1: false};
+    console.log(contrasts[0], '<--->', contrasts[1]);
 
     var css = '<style id="jspsych-2afc-p5-css">'+
     '.choice-container {display: inline-block; border: 3px solid #F2F2F2; position: relative; height: '+choice_dims.height+'px; width: '+choice_dims.width+'px}'+
     '.choice-container:hover {border: 3px solid #5FD8E7;}'+
     '#outer-container {width: '+outer_dims.width+'px; margin: auto;}'+
-    '#instructions {width:  '+outer_dims.width+'px; margin: auto;}'+
+    '#instructions {width:  '+outer_dims.width+'px; margin: 5px auto 20px;}'+
     '.left {float: left;}'+
     '.right {float: right;}'+
     '</style>';
 
-    var html = '<div id="task-container"><div id="instructions" class="instructions">'+trial.instructions+'</div>'+
-    '<div id="outer-container"><div id="choice0" class="choice-container left"></div>'+
-    '<div id="choice1" class="choice-container right"></div></div></div>';
+    var html = '<div id="task-container" style="visibility: hidden;"><div id="instructions" class="instructions">'+trial.instructions+'</div>'+
+    '<div id="outer-container"><div id="choice_0" class="choice-container left"></div>'+
+    '<div id="choice_1" class="choice-container right"></div></div></div>';
 
     display_element.innerHTML = css + html;
 
@@ -313,18 +314,33 @@ jsPsych.plugins['2afc-p5'] = (function(){
         agents.forEach(function(d,i){
           d.show();
         });
+
+        // check if both sketches are set up
+        // if so, show then and start timer
+        sketches_complete[choiceID] = true;
+        if(sketches_complete[0] & sketches_complete[1]){
+          $('#task-container').css('visibility', 'visible');
+          start_time = Date.now();
+        }
+
       };
 
-    }, 'choice'+choiceID);
-
-    //inputs
-    $('.choice-container').on('click', function(e){
-      var target = e.target.id;
-      var choice = target.charAt(target.length-1);
-      var diversity = contrasts[parseInt(choice)];
-      console.log(target, choice, diversity);
-    });
+    }, 'choice_'+choiceID);
   }
+
+  //inputs
+  $('.choice-container').on('click', function(e){
+    var target = e.target.id;
+    var choice = parseInt(target.charAt(target.length-1));
+    trial_data.diversity = contrasts[choice];
+    trial_data.target = target;
+    trial_data.choice = choice;
+    trial_data.rt = Date.now() - start_time;
+    $('.choice-container').off();
+    display_element.innerHTML = '';
+    jsPsych.finishTrial(trial_data);
+  });
+
 };
 
 
