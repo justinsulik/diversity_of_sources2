@@ -50,6 +50,8 @@
       [[150, 0, 0],[0, 150, 0],[0, 0, 150]]
     ]
 
+    var practice_backgrounds = [[255, 170, 150],[170, 250, 170],[170, 170, 250],[250, 170, 240]];
+
     var skin_colors = [
       [255, 229, 200],
       [255, 218, 190],
@@ -108,19 +110,35 @@
       type: 'survey-multi-choice',
       questions: questions_eng_shuffled,
       preamble: 'Are the following sentences good English ("yes") or not ("no")?',
+      data: {block: 'english'}
     };
 
 
-    // practice trials
-    // ! do some !
+    var sources_instructions = {
+      type: 'instructions',
+      pages: ['In the second task, imagine that you are working for your state government. '+
+      'Your job is to travel around small towns in your state and interview people on a range of topics, '+
+      'including their beliefs about how the state government is doing. '+
+      'The people in these particular towns mostly get their information about such matters from local TV news channels.<br><br>'+
+      'You wouldn\'t have enough time to interview everybody, so you\'ll have to be selective '+
+      'and interview just 5 people per town, '+
+      'but you want to make sure you get an accurate idea of what the town in general believes.<br><br>'+
+      'For each trial, we will show you two samples of local townspeople, along with their preferred news channels. '+
+      'Each sample has 5 people. You need to pick one of samples to interview. '+
+      'Your task is to decide which of these two samples you would trust more '+
+      'to give you an accurate reflection of what the town in general believes.',
+      'First you will do a practice trial.'],
+      show_clickable_nav: true
+    }
 
-    // main trials
+    // sources trial data
     var tv_factors = {
       gender: ['male', 'female'],
       channel: _.range(10)};
     var tv_channels_all = _.map(jsPsych.randomization.factorial(tv_factors, 1), function(obj){
       return obj.gender+obj.channel
     });
+
     var contrasts = [[5, 3], [5, 2], [5,1], [4, 2], [4, 1], [3, 1]];
     var contrasts_timeline = _.map(contrasts, function(contrast, i){
       var channels_sample = jsPsych.randomization.sampleWithoutReplacement(tv_channels_all, contrast[0]);
@@ -130,14 +148,74 @@
     })
     var contrasts_timeline_shuffled = jsPsych.randomization.shuffle(contrasts_timeline);
 
+    // practice trial
+    var sources_practice = {
+      type: '2afc-p5',
+      contrasts: [4, 3],
+      skin_colors: jsPsych.randomization.sampleWithoutReplacement(skin_colors, 5),
+      shirt_colors: jsPsych.randomization.sampleWithoutReplacement(shirt_colors, 10),
+      tv_background: practice_backgrounds,
+      tv_channels: jsPsych.randomization.sampleWithoutReplacement(tv_channels_all, 4),
+      data: {practice: true}
+    };
+
+    var sources_instructions2 = {
+      type: 'instructions',
+      pages: ['Next you will do the main trials. There will be '+contrasts.length+' of them.'],
+      show_clickable_nav: true
+    }
+
+    // main trials
 
     var sources_trial = {
       type: '2afc-p5',
       skin_colors: jsPsych.randomization.sampleWithoutReplacement(skin_colors, 5),
       shirt_colors: jsPsych.randomization.sampleWithoutReplacement(shirt_colors, 10),
+      data: {practice: false},
       timeline: contrasts_timeline_shuffled
     }
 
+    // choice of strategy
+
+    var feedback_text = {
+      type: 'survey-text',
+      questions: [{name: 'strategy_text',
+        prompt: 'How did you make your decisions in this task? What factors did you consider?',
+        required: true,
+        rows: 8,
+        columns: 80
+      }]
+    }
+
+    // likert: how important each factor?
+    var importance_labels = ['Not at all important',
+                             'Slightly important',
+                             'Moderately important',
+                             'Quite important',
+                             'Extremely important']
+
+    var feedback_questions = [
+     {name: 'appearance',
+      prompt: '<b>Their appearance (e.g., hair or clothes)</b>',
+      required: true,
+      labels: importance_labels},
+     {name: 'demo',
+      prompt: '<b>Their demographics (e.g., gender or ethnicity)</b>',
+      required: true,
+      labels: importance_labels},
+     {name: 'sources',
+      prompt: '<b>Their sources of information (e.g., TV channel)</b>',
+      required: true,
+      labels: importance_labels}]
+
+    var feedback_questions_shuffled = jsPsych.randomization.shuffle(feedback_questions);
+
+    var feedback_likert = {
+      type: 'survey-likert',
+      questions: feedback_questions_shuffled,
+      preamble: 'How important do you think each factor is for deciding which group to interview ' +
+      'to gain an accurate idea of what the town in general believes.'
+    }
 
     // bio
 
@@ -146,12 +224,17 @@
 
     // timeline
 
-    // timeline.push(consent);
-    // timeline.push(english_instructions);
-    // timeline.push(english);
-    //
+    timeline.push(consent);
+    timeline.push(english_instructions);
+    timeline.push(english);
 
-    timeline.push(sources_trial)
+
+    timeline.push(sources_instructions);
+    timeline.push(sources_practice);
+    timeline.push(sources_instructions2);
+    timeline.push(sources_trial);
+    timeline.push(feedback_text);
+    timeline.push(feedback_likert);
 
     jsPsych.init({
         // preload_images: landscapes_shuffled.concat(animalImgs),
