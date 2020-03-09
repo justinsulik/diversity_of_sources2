@@ -103,7 +103,6 @@ app.post('/data', (req, res, next) => {
 
 // --- RENDER DEBRIEFING SCREEN
 app.get('/finish', (req, res) => {
-  const sessId = req.session.id;
   let code = req.query.token;
   if(code.length>=0){
     code = code + makeCode(3) + '5';

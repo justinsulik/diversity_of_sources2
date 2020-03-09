@@ -14,6 +14,7 @@
         <script language="javascript" src="jspsych/plugins/jspsych-survey-text.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-survey-likert-customized.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-survey-multi-choice.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-demographics.js"></script>
         <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
         <link href="css/experiment.css" rel="stylesheet" type="text/css"></link>
     </head>
@@ -219,22 +220,27 @@
 
     // bio
 
+    var demographics = {
+      type: 'demographics'
+    }
+
 
     // feedback
 
     // timeline
 
-    timeline.push(consent);
-    timeline.push(english_instructions);
-    timeline.push(english);
-
-
-    timeline.push(sources_instructions);
-    timeline.push(sources_practice);
-    timeline.push(sources_instructions2);
-    timeline.push(sources_trial);
-    timeline.push(feedback_text);
-    timeline.push(feedback_likert);
+    // timeline.push(consent);
+    // timeline.push(english_instructions);
+    // timeline.push(english);
+    //
+    //
+    // timeline.push(sources_instructions);
+    // timeline.push(sources_practice);
+    // timeline.push(sources_instructions2);
+    // timeline.push(sources_trial);
+    // timeline.push(feedback_text);
+    // timeline.push(feedback_likert);
+    timeline.push(demographics);
 
     jsPsych.init({
         default_iti: 500,
