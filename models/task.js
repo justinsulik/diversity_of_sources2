@@ -5,13 +5,9 @@ const taskSchema = new mongoose.Schema({
   hitId: String,
   assignmentId: String,
   trial_id: String,
-  sessionId: String,
   created: { type: Date, default: Date.now },
   studyName: String,
   browser: mongoose.Schema.Types.Mixed,
-  ip: String,
-  ip_remote: String,
-  geo: mongoose.Schema.Types.Mixed
 });
 
 let Task = module.exports = mongoose.model('Task', taskSchema);

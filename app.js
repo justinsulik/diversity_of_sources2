@@ -8,11 +8,9 @@ https://salty-journey-53248.herokuapp.com/ | https://git.heroku.com/salty-journe
 const express = require('express'),
   url = require('url'),
   body_parser = require('body-parser'),
-  session = require('express-session'),
   ejs = require('ejs'),
   _ = require('lodash'),
   detect = require('browser-detect'),
-  geoip = require('geoip-lite'),
   db = require(__dirname+'/controllers/db'),
   tasks = require(__dirname+'/controllers/tasks'),
   responses = require(__dirname+'/controllers/responses'),
@@ -22,16 +20,9 @@ const express = require('express'),
 const studyName = 'study2_test';
 const app = express();
 const PORT = process.env.PORT || 5000;
-app.use(
-  session({
-    secret: 'retire master pilot address',
-    resave: false,
-    saveUninitialized: true,
-  })
-);
 
 // --- MONGOOSE SETUP
-// db.connect(process.env.MONGODB_URI);
+db.connect(process.env.MONGODB_URI);
 
 // --- STATIC MIDDLEWARE
 app.use(express.static(__dirname + '/public'));
@@ -58,30 +49,21 @@ function errorHandler(err){
 // --- ROUTING
 
 app.get('/', (req, res, next) => {
-    const sessId = req.session.id;
     const workerId = req.query.workerId || '';
     const assignmentId = req.query.assignmentId || '';
     const hitId = req.query.hitId || '';
     const trial_id = makeCode(2)+'5'+makeCode(5)+'RtR'+makeCode(4)+'m'+makeCode(2);
     const browser = detect(req.headers['user-agent']);
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null);
-    let geo = {};
-    if(ip){
-      geo = geoip.lookup(ip);
-    }
 
     // save trial info
-    // tasks.save({
-    //     "workerId": workerId,
-    //     "hitId": hitId,
-    //     "assignmentId": assignmentId,
-    //     "trial_id": trial_id,
-    //     "sessionId": sessId,
-    //     "studyName": studyName,
-    //     "browser": browser,
-    //     "ip": ip,
-    //     "geo": geo
-    // });
+    tasks.save({
+        "workerId": workerId,
+        "hitId": hitId,
+        "assignmentId": assignmentId,
+        "trial_id": trial_id,
+        "studyName": studyName,
+        "browser": browser,
+    });
 
     // Check browser not IE, and device not mobile
     let browserOk = true;

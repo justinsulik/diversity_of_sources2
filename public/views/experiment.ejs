@@ -123,10 +123,10 @@
       'You wouldn\'t have enough time to interview everybody, so you\'ll have to be selective '+
       'and interview just 5 people per town, '+
       'but you want to make sure you get an accurate idea of what the town in general believes.<br><br>'+
-      'For each trial, we will show you two samples of local townspeople, along with their preferred news channels. '+
-      'Each sample has 5 people. You need to pick one of samples to interview. '+
+      'For each trial, we will show you two groups of local townspeople, along with their preferred news channels. '+
+      'Each group has 5 people in it. '+
       'Your task is to decide which of these two samples you would trust more '+
-      'to give you an accurate reflection of what the town in general believes.',
+      'to give you an accurate reflection of what the town in general believes, if you interviewed them.',
       'First you will do a practice trial.'],
       show_clickable_nav: true
     }
@@ -237,7 +237,6 @@
     timeline.push(feedback_likert);
 
     jsPsych.init({
-        // preload_images: landscapes_shuffled.concat(animalImgs),
         default_iti: 500,
         show_progress_bar: true,
         // exclusions: {
