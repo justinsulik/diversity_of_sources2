@@ -46,6 +46,11 @@ jsPsych.plugins['2afc-p5'] = (function(){
         type: jsPsych.plugins.parameterType.STRING,
         array: true,
         description: 'File name for TV anchors'
+      },
+      town_name: {
+        type: jsPsych.plugins.parameterType.STRING,
+        default: null,
+        description: 'Town name'
       }
     }
   };
@@ -55,7 +60,6 @@ jsPsych.plugins['2afc-p5'] = (function(){
     /****
     ** Set up basic html for trial
     ****/
-    console.log(trial)
 
     var choice_dims = {width: 300, height: 500};
     var outer_dims = {width: 700};
@@ -72,7 +76,12 @@ jsPsych.plugins['2afc-p5'] = (function(){
     '.right {float: right;}'+
     '</style>';
 
-    var html = '<div id="task-container" style="visibility: hidden;"><div id="instructions" class="instructions">'+trial.instructions+'</div>'+
+    var town_string = '';
+    if(trial.town_name){
+      town_string += 'You are visiting the town of <b>' + trial.town_name + '</b>. ';
+    }
+
+    var html = '<div id="task-container" style="visibility: hidden;"><div id="instructions" class="instructions">'+town_string+trial.instructions+'</div>'+
     '<div id="outer-container"><div id="choice_0" class="choice-container left"></div>'+
     '<div id="choice_1" class="choice-container right"></div></div></div>';
 
@@ -155,6 +164,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
 /*
  P5.js sketch
 */
+
   function createSketch(choiceID){
     console.log('Creating ', choiceID);
     sketches[choiceID] = new p5(function( sketch ) {
@@ -330,7 +340,10 @@ jsPsych.plugins['2afc-p5'] = (function(){
     }, 'choice_'+choiceID);
   }
 
-  //inputs
+/*
+Handle trial responses
+*/
+
   $('.choice-container').on('click', function(e){
     var target = e.target.id;
     var choice = parseInt(target.charAt(target.length-1));

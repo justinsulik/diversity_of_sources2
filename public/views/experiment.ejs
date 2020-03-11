@@ -25,7 +25,9 @@
 /*
 Set up study variables
 */
+    // following syntax accepts data from app.js
     var input_data = <%- input_data %>
+
     var trial_id = input_data.trial_id
     var cmpltnCd = makeCode(3)+'RtR' + makeCode(5) + '4z4'
     jsPsych.data.addProperties({cmpltnCd: cmpltnCd,
@@ -92,6 +94,22 @@ Set up study variables
       [255, 255, 255],
       [0, 0, 0]];
 
+      // town names
+      var town_names = [
+        'Franklin',
+        'Chester',
+        'Greenville',
+        'Springfield',
+        'Fairfield',
+        'Riverside',
+        'Kingston',
+        'Marion',
+        'Georgetown',
+        'Middleton',
+        'Centerville'];
+
+      var town_names_shuffled = jsPsych.randomization.shuffle(town_names);
+
 /*
 Sources trial data
 */
@@ -103,7 +121,7 @@ Sources trial data
       return obj.gender+obj.channel
     });
 
-    // contrasts for each trial, grouped by difference in # channels
+    // contrasts for each trial, grouped by difference in number of channels
     var contrasts = {
       2: [[5, 3], [4, 2], [3, 1]],
       3: [[5, 2], [4, 1]],
@@ -121,7 +139,7 @@ Sources trial data
     }
     // Set up trial timeline in line with above batch order
     var contrasts_timeline = [];
-    batch_order.forEach(function(contrast){
+    batch_order.forEach(function(contrast, j){
       var trials = contrasts[contrast]
       // shuffle trials within each batch
       var trials_shuffled = jsPsych.randomization.shuffle(trials);
@@ -130,17 +148,15 @@ Sources trial data
         var max_channels = _.max(trial);
         // sample that many channels and background colors
         var channels_sample = jsPsych.randomization.sampleWithoutReplacement(tv_channels_all, max_channels);
-        console.log('difference ', contrast, ' choices ', trial[0], '-', trial[1])
-        console.log('max ', max_channels, ' trial ', i)
         // use tv_background_counter to find the next unused set of background colors
         var tv_backgrounds_index = tv_background_counter[max_channels];
         var tv_background = tv_backgrounds[max_channels][tv_backgrounds_index];
         tv_background_counter[max_channels] += 1;
-        console.log('background ', tv_background)
         contrasts_timeline.push({
           contrasts: trial,
           tv_background: tv_background,
-          tv_channels: channels_sample
+          tv_channels: channels_sample,
+          town_name: town_names_shuffled[contrasts_timeline.length+1]
         })
       })
     })
@@ -196,17 +212,19 @@ Define trials
     var sources_instructions = {
       type: 'instructions',
       pages: ['In the second task, imagine that you are working for your state government. '+
-      'Your job is to travel around small towns in your state and interview people on a range of topics, '+
-      'including their beliefs about how the state government is doing. '+
+      'Your job is to travel around to various small towns in your state and interview people on a range of topics, '+
+      'including their beliefs about how the state government is performing. '+
       'The people in these particular towns mostly get their information about such matters from local TV news channels.<br><br>'+
       'You wouldn\'t have enough time to interview everybody, so you\'ll have to be selective '+
       'and interview just 5 people per town, '+
       'but you want to make sure you get an accurate idea of what the town in general believes.<br><br>'+
-      'For each trial, we will show you two groups of local townspeople, along with their preferred news channels. '+
-      'Each group has 5 people in it. '+
-      'Your task is to decide which of these two samples you would trust more '+
-      'to give you an accurate reflection of what the town in general believes, if you interviewed them.',
-      'First you will do a practice trial.'],
+      'For each trial, we will show you two groups of five townspeople, along with their preferred news channels. '+
+      'Your task is to decide which of these two groups you would trust more '+
+      'to give you an accurate reflection of the town\'s attitudes and beliefs, in general.',
+      'We are using fictitious town names, and are using cartoons to represent the people and the TV news channels. '+
+      'Don\'t worry too much about trying to differentiate people and channels based on subtle differences. '+
+      'If they look even slightly different, then they are different! This will be most evident in the colors we are using.<br><br>'+
+      'First, you will do a practice trial.'],
       show_clickable_nav: true
     }
 
@@ -218,12 +236,13 @@ Define trials
       shirt_colors: jsPsych.randomization.sampleWithoutReplacement(shirt_colors, 10),
       tv_background: practice_backgrounds,
       tv_channels: jsPsych.randomization.sampleWithoutReplacement(tv_channels_all, 4),
+      town_name: town_names_shuffled[0],
       data: {practice: true}
     };
 
     var sources_instructions2 = {
       type: 'instructions',
-      pages: ['Next you will do the main trials. There will be '+contrasts.length+' of them.'],
+      pages: ['Next you will do the main trials. There will be 5 of them.'],
       show_clickable_nav: true
     }
 
@@ -234,7 +253,7 @@ Define trials
       skin_colors: jsPsych.randomization.sampleWithoutReplacement(skin_colors, 5),
       shirt_colors: jsPsych.randomization.sampleWithoutReplacement(shirt_colors, 10),
       data: {practice: false},
-      timeline: contrasts_timeline
+      timeline: contrasts_timeline,
     }
 
     // feedback
@@ -293,9 +312,9 @@ Define trials
     // timeline.push(english);
     //
     //
-    // timeline.push(sources_instructions);
-    // timeline.push(sources_practice);
-    // timeline.push(sources_instructions2);
+    timeline.push(sources_instructions);
+    timeline.push(sources_practice);
+    timeline.push(sources_instructions2);
     timeline.push(sources_trial);
     timeline.push(feedback_text);
     timeline.push(feedback_likert);
