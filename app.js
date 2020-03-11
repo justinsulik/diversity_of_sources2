@@ -77,7 +77,7 @@ app.get('/', (req, res, next) => {
     if(browserOk){
       res.render('experiment.ejs', {input_data: JSON.stringify({trial_id: trial_id})});
     } else {
-      res.send('You seem to be viewing this either on a mobile device or with Internet Explorer. The instructions explicitly forbade those. Please just return the HIT.');
+      res.send('You seem to be viewing this either on a mobile device or with Internet Explorer. You will not be able to take this study with either. Please just return the HIT.');
     }
 
 });

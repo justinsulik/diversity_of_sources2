@@ -55,6 +55,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
     /****
     ** Set up basic html for trial
     ****/
+    console.log(trial)
 
     var choice_dims = {width: 300, height: 500};
     var outer_dims = {width: 700};
@@ -162,6 +163,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
       var displays = [];
       var agents = [];
       var tvs = [];
+      var tvs_indexes = jsPsych.randomization.shuffle(_.range(trial.agents));
       var tv_channels = [];
       var agentParts = {m: {hair: {}}, f: {hair: {}}};
       var agentSize = 90;
@@ -236,7 +238,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
       function Display(agentNumber, channel){
         this.agentNumber = agentNumber;
         this.channel = channel;
-        this.tv = tvs[agentNumber];
+        this.tv = tvs[tvs_indexes[agentNumber]];
         this.background_color = trial.tv_background[channel];
         this.y = agentNumber*((choice_dims.height-topMargin)/agent_count) + topMargin + 5;
         this.x = 140;

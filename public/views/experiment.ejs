@@ -22,7 +22,9 @@
     </body>
     <script>
 
-
+/*
+Set up study variables
+*/
     var input_data = <%- input_data %>
     var trial_id = input_data.trial_id
     var cmpltnCd = makeCode(3)+'RtR' + makeCode(5) + '4z4'
@@ -37,22 +39,22 @@
     var cmpltnCdEnd;
     var dataUrl = '/data?trial_id=' + trial_id;
 
-    // colors
-
-    var tv_backgrounds =  [
+    // specify RGB colors for TV backgrounds
+    var tv_backgrounds =  {
       // 5 contrasts
-      [[240, 25, 75], [245, 150, 60], [60, 180, 75], [0, 130, 200], [145, 30, 180]],
+      5: [[[240, 25, 75], [245, 150, 60], [60, 180, 75], [0, 130, 200], [145, 30, 180]],
       [[215, 0, 30],[255, 225, 25],[210, 245, 60],[70, 240, 240],[245, 70, 245]],
-      [[255, 170, 150],[250, 250, 170],[170, 250, 170],[170, 170, 250],[250, 170, 240]],
+      [[255, 170, 150],[250, 250, 170],[170, 250, 170],[170, 170, 250],[250, 170, 240]]],
       // 4 contrasts
-      [[255, 225, 25],[210, 245, 60],[70, 240, 240],[240, 50, 230]],
-      [[245, 130, 48],[60, 180, 75],[0, 130, 200],[145, 30, 180]],
+      4: [[[255, 225, 25],[210, 245, 60],[70, 240, 240],[240, 50, 230]],
+      [[245, 130, 48],[60, 180, 75],[0, 130, 200],[145, 30, 180]]],
       // 3 contrasts
-      [[150, 0, 0],[0, 150, 0],[0, 0, 150]]
-    ]
-
+      3: [[[150, 0, 0],[0, 150, 0],[0, 0, 150]]]
+    }
+    var tv_background_counter = {5: 0, 4: 0, 3: 0};
     var practice_backgrounds = [[255, 170, 150],[170, 250, 170],[170, 170, 250],[250, 170, 240]];
 
+    // colors for skin/shirts
     var skin_colors = [
       [255, 229, 200],
       [255, 218, 190],
@@ -65,13 +67,88 @@
       [120, 92, 80],
       [90, 69, 60],
     ]
-
     // #https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
-    var shirt_colors = [[230, 25, 75], [60, 180, 75], [225, 225, 25], [67, 99, 216], [245, 130, 49],
-    [145, 30, 180], [70, 240, 240], [240, 50, 230], [188, 246, 12], [250, 190, 190], [0, 128, 128], [230,190, 255],
-    [154, 99, 36], [255, 250, 200], [128, 0, 0], [170, 255, 195], [128, 128, 0], [255, 216, 177], [0, 0, 117],
-    [128, 128, 128], [255, 255, 255], [0, 0, 0]];
+    var shirt_colors = [
+      [230, 25, 75],
+      [60, 180, 75],
+      [225, 225, 25],
+      [67, 99, 216],
+      [245, 130, 49],
+      [145, 30, 180],
+      [70, 240, 240],
+      [240, 50, 230],
+      [188, 246, 12],
+      [250, 190, 190],
+      [0, 128, 128],
+      [230,190, 255],
+      [154, 99, 36],
+      [255, 250, 200],
+      [128, 0, 0],
+      [170, 255, 195],
+      [128, 128, 0],
+      [255, 216, 177],
+      [0, 0, 117],
+      [128, 128, 128],
+      [255, 255, 255],
+      [0, 0, 0]];
 
+/*
+Sources trial data
+*/
+    // generate tv channel IDs
+    var tv_factors = {
+      gender: ['male', 'female'],
+      channel: _.range(10)};
+    var tv_channels_all = _.map(jsPsych.randomization.factorial(tv_factors, 1), function(obj){
+      return obj.gender+obj.channel
+    });
+
+    // contrasts for each trial, grouped by difference in # channels
+    var contrasts = {
+      2: [[5, 3], [4, 2], [3, 1]],
+      3: [[5, 2], [4, 1]],
+      4: [[5, 1]]
+    };
+
+    // Set batch order (so contrasts can be presented in either increasing or decreasing difficulty)
+    var batch_order;
+    if(Math.random()<0.5){
+      console.log('Condition: decreasing difficulty')
+      batch_order = [2, 3, 4];
+    } else {
+      console.log('Condition: increasing difficulty')
+      batch_order = [4, 3, 2];
+    }
+    // Set up trial timeline in line with above batch order
+    var contrasts_timeline = [];
+    batch_order.forEach(function(contrast){
+      var trials = contrasts[contrast]
+      // shuffle trials within each batch
+      var trials_shuffled = jsPsych.randomization.shuffle(trials);
+      trials_shuffled.forEach(function(trial, i){
+        // of the two choices, find the largest number
+        var max_channels = _.max(trial);
+        // sample that many channels and background colors
+        var channels_sample = jsPsych.randomization.sampleWithoutReplacement(tv_channels_all, max_channels);
+        console.log('difference ', contrast, ' choices ', trial[0], '-', trial[1])
+        console.log('max ', max_channels, ' trial ', i)
+        // use tv_background_counter to find the next unused set of background colors
+        var tv_backgrounds_index = tv_background_counter[max_channels];
+        var tv_background = tv_backgrounds[max_channels][tv_backgrounds_index];
+        tv_background_counter[max_channels] += 1;
+        console.log('background ', tv_background)
+        contrasts_timeline.push({
+          contrasts: trial,
+          tv_background: tv_background,
+          tv_channels: channels_sample
+        })
+      })
+    })
+
+
+/*
+Define trials
+*/
     // consent
 
     var consent = {
@@ -84,7 +161,7 @@
       cont_btn: 'consent'
     }
 
-    // english
+    // english instructions
 
     var english_instructions = {
       type: 'instructions',
@@ -114,6 +191,7 @@
       data: {block: 'english'}
     };
 
+    // sources instructions
 
     var sources_instructions = {
       type: 'instructions',
@@ -132,24 +210,7 @@
       show_clickable_nav: true
     }
 
-    // sources trial data
-    var tv_factors = {
-      gender: ['male', 'female'],
-      channel: _.range(10)};
-    var tv_channels_all = _.map(jsPsych.randomization.factorial(tv_factors, 1), function(obj){
-      return obj.gender+obj.channel
-    });
-
-    var contrasts = [[5, 3], [5, 2], [5,1], [4, 2], [4, 1], [3, 1]];
-    var contrasts_timeline = _.map(contrasts, function(contrast, i){
-      var channels_sample = jsPsych.randomization.sampleWithoutReplacement(tv_channels_all, contrast[0]);
-      return {contrasts: contrast,
-              tv_background: tv_backgrounds[i],
-              tv_channels: channels_sample};
-    })
-    var contrasts_timeline_shuffled = jsPsych.randomization.shuffle(contrasts_timeline);
-
-    // practice trial
+    // sources practice trial
     var sources_practice = {
       type: '2afc-p5',
       contrasts: [4, 3],
@@ -173,10 +234,10 @@
       skin_colors: jsPsych.randomization.sampleWithoutReplacement(skin_colors, 5),
       shirt_colors: jsPsych.randomization.sampleWithoutReplacement(shirt_colors, 10),
       data: {practice: false},
-      timeline: contrasts_timeline_shuffled
+      timeline: contrasts_timeline
     }
 
-    // choice of strategy
+    // feedback
 
     var feedback_text = {
       type: 'survey-text',
@@ -188,7 +249,6 @@
       }]
     }
 
-    // likert: how important each factor?
     var importance_labels = ['Not at all important',
                              'Slightly important',
                              'Moderately important',
@@ -225,18 +285,17 @@
     }
 
 
-    // feedback
 
-    // timeline
+    // fill timeline
 
-    timeline.push(consent);
-    timeline.push(english_instructions);
-    timeline.push(english);
-
-
-    timeline.push(sources_instructions);
-    timeline.push(sources_practice);
-    timeline.push(sources_instructions2);
+    // timeline.push(consent);
+    // timeline.push(english_instructions);
+    // timeline.push(english);
+    //
+    //
+    // timeline.push(sources_instructions);
+    // timeline.push(sources_practice);
+    // timeline.push(sources_instructions2);
     timeline.push(sources_trial);
     timeline.push(feedback_text);
     timeline.push(feedback_likert);
