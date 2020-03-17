@@ -27,10 +27,10 @@ jsPsych.plugins['2afc-p5'] = (function(){
         default: 5,
         description: 'number of agents in each choice'
       },
-      instructions: {
+      preamble: {
         type: jsPsych.plugins.parameterType.STRING,
         default: 'Which group\'s opinions would you trust more?',
-        description: 'instructions, with each stage of the trial as a key. Stages = scenario, priorEstimate, tvStart, tvsOn, socInfoCheck, posteriorEstimate'
+        description: 'preamble, with each stage of the trial as a key. Stages = scenario, priorEstimate, tvStart, tvsOn, socInfoCheck, posteriorEstimate'
       },
       skin_colors: {
         type: jsPsych.plugins.parameterType.COMPLEX,
@@ -71,7 +71,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
     '.choice-container {display: inline-block; border: 3px solid #F2F2F2; position: relative; height: '+choice_dims.height+'px; width: '+choice_dims.width+'px}'+
     '.choice-container:hover {border: 3px solid #5FD8E7;}'+
     '#outer-container {width: '+outer_dims.width+'px; margin: auto;}'+
-    '#instructions {width:  '+outer_dims.width+'px; margin: 5px auto 20px;}'+
+    '#preamble {width:  '+outer_dims.width+'px; margin: 5px auto 20px;}'+
     '.left {float: left;}'+
     '.right {float: right;}'+
     '</style>';
@@ -81,7 +81,7 @@ jsPsych.plugins['2afc-p5'] = (function(){
       town_string += 'You are visiting the town of <b>' + trial.town_name + '</b>. ';
     }
 
-    var html = '<div id="task-container" style="visibility: hidden;"><div id="instructions" class="instructions">'+town_string+trial.instructions+'</div>'+
+    var html = '<div id="task-container" style="visibility: hidden;"><div id="preamble" class="preamble">'+town_string+trial.preamble+'</div>'+
     '<div id="outer-container"><div id="choice_0" class="choice-container left"></div>'+
     '<div id="choice_1" class="choice-container right"></div></div></div>';
 

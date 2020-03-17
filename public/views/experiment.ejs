@@ -56,6 +56,19 @@ Set up study variables
     var tv_background_counter = {5: 0, 4: 0, 3: 0};
     var practice_backgrounds = [[255, 170, 150],[170, 250, 170],[170, 170, 250],[250, 170, 240]];
 
+    var attn_checks = {
+      0: {
+        tv_background: [[247, 171, 40], [41, 59, 255]],
+        preamble: 'Choose the side with more orange backgrounds.',
+        correct: 'less diverse'
+      },
+      1: {
+        tv_background: [[41, 59, 255], [247, 171, 40]],
+        preamble: 'Choose the side with fewer blue backgrounds.',
+        correct: 'more diverse'
+      }
+    }
+
     // colors for skin/shirts
     var skin_colors = [
       [255, 229, 200],
@@ -133,9 +146,11 @@ Sources trial data
     if(Math.random()<0.5){
       console.log('Condition: decreasing difficulty')
       batch_order = [2, 3, 4];
+      jsPsych.data.addProperties({difficulty: 'decreasing'});
     } else {
       console.log('Condition: increasing difficulty')
       batch_order = [4, 3, 2];
+      jsPsych.data.addProperties({difficulty: 'increasing'});
     }
     // Set up trial timeline in line with above batch order
     var contrasts_timeline = [];
@@ -159,6 +174,19 @@ Sources trial data
           town_name: town_names_shuffled[contrasts_timeline.length+1]
         })
       })
+      // after each of the first two batches, add an attention check
+      if(j<2){
+        contrasts_timeline.push({
+          contrasts: [1, 2],
+          tv_background: attn_checks[j].tv_background,
+          tv_channels: jsPsych.randomization.sampleWithoutReplacement(tv_channels_all, 2),
+          preamble: attn_checks[j].preamble,
+          data: {
+            attn_check: true,
+            correct_answer: attn_checks[j].correct
+          }
+        })
+      }
     })
 
 
@@ -242,7 +270,7 @@ Define trials
 
     var sources_instructions2 = {
       type: 'instructions',
-      pages: ['Next you will do the main trials. There will be 6 of them.'],
+      pages: ['Next you will do the main trials. There will be 8 of them.'],
       show_clickable_nav: true
     }
 
@@ -321,10 +349,10 @@ Define trials
     jsPsych.init({
         default_iti: 500,
         show_progress_bar: true,
-        // exclusions: {
-        //   min_width: 800,
-        //   min_height: 500
-        // },
+        exclusions: {
+          min_width: 800,
+          min_height: 500
+        },
         timeline: timeline,
         on_finish: function(){
           save();
