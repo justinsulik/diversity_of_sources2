@@ -59,12 +59,12 @@ Set up study variables
     var attn_checks = {
       0: {
         tv_background: [[247, 171, 40], [41, 59, 255]],
-        preamble: 'Choose the side with more orange backgrounds.',
+        preamble: 'Choose the side with <b>more orange</b> backgrounds.',
         correct: 'less diverse'
       },
       1: {
         tv_background: [[41, 59, 255], [247, 171, 40]],
-        preamble: 'Choose the side with fewer blue backgrounds.',
+        preamble: 'Choose the side with <b>fewer blue</b> backgrounds.',
         correct: 'more diverse'
       }
     }
@@ -338,11 +338,11 @@ Define trials
 
     // fill timeline
 
-    timeline.push(consent);
-    timeline.push(english_instructions);
-    timeline.push(english);
-    timeline.push(sources_instructions);
-    timeline.push(sources_practice);
+    // timeline.push(consent);
+    // timeline.push(english_instructions);
+    // timeline.push(english);
+    // timeline.push(sources_instructions);
+    // timeline.push(sources_practice);
     timeline.push(sources_instructions2);
     timeline.push(sources_trial);
     timeline.push(feedback_text);
