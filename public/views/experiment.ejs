@@ -169,7 +169,7 @@ Sources trial data
         tv_background_counter[max_channels] += 1;
         contrasts_timeline.push({
           contrasts: trial,
-          preamble: 'Which group would you invite to a photoshoot?',
+          preamble: 'Which group would you invite to a fashion photoshoot?',
           tv_background: tv_background,
           tv_channels: channels_sample,
           town_name: town_names_shuffled[contrasts_timeline.length+1]
@@ -242,11 +242,11 @@ Define trials
       type: 'instructions',
       pages: ['In the second task, imagine that you are working for a local fashion and lifestyle magazine. '+
       'This month, your job is to travel around to various small towns in your state and take pictures of the regular townspeople '+
-      'in their living rooms.<br><br>'+
+      'in their living rooms, as part of a "everyday fashions" feature.<br><br>'+
       // 'The people in these particular towns mostly get their information about such matters from local TV news channels.<br><br>'+
       'You wouldn\'t have enough time to interview everybody, so you\'ll have to be selective '+
       'and interview just 5 people per town, '+
-      'but you want to make sure you get the best pictures for the magazine.<br><br>'+
+      'but you want to make sure you get the best pictures for the magazine, based on who you think is most stylish.<br><br>'+
       'For each trial, we will show you two groups of five townspeople. '+
       'Your task is to decide which of these two groups you would invite to a photo shoot.',
       'We are using fictitious town names, and are using cartoons to represent the townspeople.<br><br>'+
@@ -258,7 +258,7 @@ Define trials
     var sources_practice = {
       type: '2afc-p5',
       contrasts: [4, 3],
-      preamble: 'Which group would you invite to a photoshoot?',
+      preamble: 'Which group would you invite to a fashion photoshoot?',
       skin_colors: jsPsych.randomization.sampleWithoutReplacement(skin_colors, 5),
       shirt_colors: jsPsych.randomization.sampleWithoutReplacement(shirt_colors, 10),
       tv_background: practice_backgrounds,
