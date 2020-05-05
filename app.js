@@ -17,7 +17,7 @@ const express = require('express'),
   {makeCode} = require('./helper/codeString.js');
 
 // --- INSTANTIATE THE APP
-const studyName = 'study2';
+const studyName = 'study3_pilot';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
