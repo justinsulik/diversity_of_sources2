@@ -169,7 +169,8 @@ Sources trial data
         tv_background_counter[max_channels] += 1;
         contrasts_timeline.push({
           contrasts: trial,
-          preamble: 'Which group would you invite to a fashion photoshoot?',
+          // preamble: 'Which group would you invite to a fashion photoshoot?',
+          preamble: 'Which group\'s opinions would you trust more?',
           tv_background: tv_background,
           tv_channels: channels_sample,
           town_name: town_names_shuffled[contrasts_timeline.length+1]
@@ -336,12 +337,12 @@ Define trials
 
     // fill timeline
 
-    timeline.push(consent);
-    timeline.push(english_instructions);
-    timeline.push(english);
-    timeline.push(sources_instructions);
-    timeline.push(sources_practice);
-    timeline.push(sources_instructions2);
+    // timeline.push(consent);
+    // timeline.push(english_instructions);
+    // timeline.push(english);
+    // timeline.push(sources_instructions);
+    // timeline.push(sources_practice);
+    // timeline.push(sources_instructions2);
     timeline.push(sources_trial);
     timeline.push(feedback_text);
     timeline.push(feedback_likert);
