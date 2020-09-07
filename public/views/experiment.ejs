@@ -59,12 +59,12 @@ Set up study variables
     var attn_checks = {
       0: {
         tv_background: [[247, 171, 40], [41, 59, 255]],
-        preamble: 'Choose the LEFT side.',
+        preamble: 'Choose the side with <b>more orange</b> backgrounds.',
         correct: 'less diverse'
       },
       1: {
         tv_background: [[41, 59, 255], [247, 171, 40]],
-        preamble: 'Choose the RIGHT side.',
+        preamble: 'Choose the side with <b>fewer blue</b> backgrounds.',
         correct: 'more diverse'
       }
     }
@@ -169,8 +169,6 @@ Sources trial data
         tv_background_counter[max_channels] += 1;
         contrasts_timeline.push({
           contrasts: trial,
-          // preamble: 'Which group would you invite to a fashion photoshoot?',
-          preamble: 'Which group\'s opinions would you trust more?',
           tv_background: tv_background,
           tv_channels: channels_sample,
           town_name: town_names_shuffled[contrasts_timeline.length+1]
@@ -241,16 +239,19 @@ Define trials
 
     var sources_instructions = {
       type: 'instructions',
-      pages: ['In the second task, imagine that you are working for a local fashion and lifestyle magazine. '+
-      'This month, your job is to travel around to various small towns in your state and take pictures of the regular townspeople '+
-      //'in their living rooms, as part of a "everyday fashions" feature.<br><br>'+
+      pages: ['In the second task, imagine that you are working for your state government. '+
+      'Your job is to travel around to various small towns in your state and interview people on a range of topics, '+
+      'including their beliefs about how the state government is performing. '+
       'The people in these particular towns mostly get their information about such matters from local TV news channels.<br><br>'+
       'You wouldn\'t have enough time to interview everybody, so you\'ll have to be selective '+
       'and interview just 5 people per town, '+
-      'but you want to make sure you get the best pictures for the magazine, based on who you think is most stylish.<br><br>'+
-      'For each trial, we will show you two groups of five townspeople. '+
-      'Your task is to decide which of these two groups you would invite to a photo shoot.',
-      'We are using fictitious town names, and are using cartoons to represent the townspeople.<br><br>'+
+      'but you want to make sure you get an accurate idea of what the town in general believes.<br><br>'+
+      'For each trial, we will show you two groups of five townspeople, along with their preferred news channels. '+
+      'Your task is to decide which of these two groups you would trust more '+
+      'to give you an accurate reflection of the town\'s attitudes and beliefs, in general.',
+      'We are using fictitious town names, and are using cartoons to represent the townspeople and the TV news channels. '+
+      'Don\'t worry too much about trying to differentiate people and channels based on subtle differences. '+
+      'If they look even slightly different, then they are different! This will be most evident in the colors we are using.<br><br>'+
       'First, you will do a practice trial.'],
       show_clickable_nav: true
     }
@@ -259,7 +260,6 @@ Define trials
     var sources_practice = {
       type: '2afc-p5',
       contrasts: [4, 3],
-      preamble: 'Which group would you invite to a fashion photoshoot?',
       skin_colors: jsPsych.randomization.sampleWithoutReplacement(skin_colors, 5),
       shirt_colors: jsPsych.randomization.sampleWithoutReplacement(shirt_colors, 10),
       tv_background: practice_backgrounds,
@@ -270,7 +270,7 @@ Define trials
 
     var sources_instructions2 = {
       type: 'instructions',
-      pages: ['Some of the trials will be <b>attention checks</b>, where we will ask you to choose a specific group (e.g. we will say "choose the LEFT group" or "choose the RIGHT group"), '+
+      pages: ['Some of the trials will be <b>attention checks</b>, where we will ask you to choose a specific group, '+
       'to show that you are reading carefully. '+
       'If you fail more than one attention check, we will not be able to use your data.',
       'Next you will do the trials. There will be 8 of them.'],
@@ -324,7 +324,8 @@ Define trials
     var feedback_likert = {
       type: 'survey-likert',
       questions: feedback_questions_shuffled,
-      preamble: 'How important do you think each factor is for deciding which group to interview.'
+      preamble: 'How important do you think each factor is for deciding which group to interview ' +
+      'to gain an accurate idea of what the town in general believes.'
     }
 
     // bio
@@ -337,12 +338,12 @@ Define trials
 
     // fill timeline
 
-    // timeline.push(consent);
-    // timeline.push(english_instructions);
-    // timeline.push(english);
-    // timeline.push(sources_instructions);
-    // timeline.push(sources_practice);
-    // timeline.push(sources_instructions2);
+    timeline.push(consent);
+    timeline.push(english_instructions);
+    timeline.push(english);
+    timeline.push(sources_instructions);
+    timeline.push(sources_practice);
+    timeline.push(sources_instructions2);
     timeline.push(sources_trial);
     timeline.push(feedback_text);
     timeline.push(feedback_likert);
